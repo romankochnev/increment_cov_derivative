@@ -87,6 +87,8 @@ compute_dSigma_dxi2 = function(xi2, A, B, K, C_xi1_xi2, C_xi2, dC_dxi2) {
   AKBT = A %*% K %*% t(B)  # k x 1
   AKAT = A %*% K %*% t(A)  # k x k
   
+  BKAT = B %*% K %*% t(A)  # 1 x k
+  
   for (i in 1:l) {
     for (j in 1:l) {
       for (c in 1:l) {
@@ -94,12 +96,12 @@ compute_dSigma_dxi2 = function(xi2, A, B, K, C_xi1_xi2, C_xi2, dC_dxi2) {
         term1 = BKBT * xi2[j] * (i == c) + BKBT * xi2[i] * (j == c)
         
         # Term 2: ξ2 BKA' C(ξ1, ξ2)'
-        term2 = (B %*% K %*% t(A) %*% C_xi1_xi2[, j]) * (i == c) + 
-          sum(xi2 %*% (B %*% K %*% t(A)) * dC_dxi2[, j, c])
+        term2 = (BKAT %*% C_xi1_xi2[, j]) * (i == c) + 
+          sum(xi2 %*% (BKAT) * dC_dxi2[, j, c])
         
         # Term 3: C(ξ1, ξ2) AKB' ξ2'
-        term3 = sum(dC_dxi2[, i, c] * (A %*% K %*% t(B) %*% t(xi2))) + 
-          (C_xi1_xi2[, i] %*% A %*% K %*% t(B)) * (j == c)
+        term3 = sum(dC_dxi2[, i, c] * (AKBT %*% t(xi2))) + 
+          (C_xi1_xi2[, i] %*% AKBT) * (j == c)
         
         # Term 4: C(ξ1, ξ2)' AKA' C(ξ1, ξ2)
         term4 = 2 * sum(dC_dxi2[, i, c] %*% (AKAT %*% C_xi1_xi2)[, j])
@@ -146,9 +148,9 @@ dSigma_dxi2[, , 1]
 
 ##### --- ∂ det(Σ)/∂ξ) --- #####
 
-BKBT = B %*% K %*% t(B)  # 1 x 1
-AKBT = A %*% K %*% t(B)  # k x 1
-AKAT = A %*% K %*% t(A)  # k x k
+BKBT = BKBT  # 1 x 1
+AKBT = AKBT  # k x 1
+AKAT = AKAT  # k x k
 
 ##### Calculate Σ_2 #####
 
